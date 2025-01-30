@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Page De Chargement{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/parcourir.css') }}">
+</head>
+<body>
+    {% block content %}
+    <div class="container">
+        <div class="title">Charger de Données</div>
+        <div class="file-upload">
+            <input type="file" id="fileInput">
+            <label for="fileInput">Parcourir</label>
+        </div>
+        <div class="user-box" id="userBox">Utilisateur : Non identifié</div>
+    </div>
+
+    <script>
+        // Variables globales
+        const userBox = document.getElementById('userBox');
+        const fileInput = document.getElementById('fileInput');
+
+        // Simuler la connexion de l'utilisateur
+        function connecterUtilisateur(nomUtilisateur) {
+            userBox.textContent = `Utilisateur : ${nomUtilisateur}`;
+        }
+
+        // Événement lorsqu'un fichier est sélectionné
+        fileInput.addEventListener('change', (event) => {
+            const fichiers = event.target.files;
+            if (fichiers.length > 0) {
+                const nomFichier = fichiers[0].name;
+                console.log(`Fichier sélectionné : ${nomFichier}`);
+
+                // Rediriger vers une autre page (par exemple "upload.html") avec des paramètres
+                window.location.href = `upload.html?file=${encodeURIComponent(nomFichier)}`;
+            }
+        });
+
+        // Simulation : Mise à jour de l'identifiant utilisateur après connexion
+        // Exemple : Appelle cette fonction une fois l'utilisateur connecté
+        setTimeout(() => {
+            connecterUtilisateur("Jean Dupont");
+        }, 2000); // Simuler un délai avant la connexion (2 secondes)
+    </script>
+{% endblock %}
+</body>
+</html>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
