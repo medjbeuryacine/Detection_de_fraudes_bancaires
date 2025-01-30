@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Télécharger{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/upload.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="message">Fichier chargé avec succès !</div>
+        <div class="file-info" id="fileInfo">
+            {% if file_name %}
+                Nom du fichier : {{ file_name }}
+            {% else %}
+                Aucun fichier n'a été sélectionné.
+            {% endif %}
+        </div>
+    </div>
+<!-- 
+    <script>
+        // Récupérer les paramètres de l'URL si nécessaires
+        const urlParams = new URLSearchParams(window.location.search);
+        const fichier = urlParams.get('file');
+
+        // Afficher le nom du fichier dans la page
+        const fileInfo = document.getElementById('fileInfo');
+        if (fichier) {
+            fileInfo.textContent = `Nom du fichier : ${fichier}`;
+        } else {
+            fileInfo.textContent = "Aucun fichier n'a été sélectionné.";
+        }
+    </script> -->
+</body>
+</html>
