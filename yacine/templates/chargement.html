@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} Import CSV et affichage en tableau {% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chargement.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Importer un fichier CSV</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="csvFile" accept=".csv" required>
+            <button type="submit">Importer</button>
+        </form>
+
+        {% if table_data %}
+        <table border="1">
+            <thead>
+                <tr>
+                    {% for header in table_data[0] %}
+                    <th>{{ header }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in table_data[1:] %}
+                <tr>
+                    {% for cell in row %}
+                    <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</body>
+</html>

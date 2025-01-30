@@ -1,0 +1,29 @@
+body {
+    background-color: #3498db; /* Fond bleu */
+    font-family: Arial, sans-serif;
+    text-align: center;
+    color: white;
+}
+.container {
+    margin: 50px auto;
+    width: 80%;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    color: black;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: left;
+}
+th {
+    background-color: #2980b9;
+    color: white;
+}

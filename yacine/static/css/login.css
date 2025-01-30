@@ -55,7 +55,7 @@ h2 {
     padding: 10px;
     border: none;
     border-radius: 5px;
-    background-color: #ffffff;
+    background-color: #00caee;
     color: #2A73CC;
     font-size: 16px;
     cursor: pointer;
@@ -65,3 +65,54 @@ h2 {
 .login-button button:hover {
     background-color: #ffffff;
 }
+
+
+
+
+
+/* les texte  */
+
+h1 {
+    font-size: 2.8em; /* Taille de police légèrement augmentée */
+    color: #ffffff; /* Couleur principale de la banque */
+    margin-bottom: 20px;
+    font-weight: 700; /* Texte en gras */
+    text-transform: uppercase; /* Texte en majuscules */
+    letter-spacing: 2px; /* Espacement entre les lettres pour un effet moderne */
+    position: relative; /* Pour ajouter un effet visuel */
+}
+
+p {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: bold;
+    /* text-align: center; */
+}
+
+
+
+/* le button de la page accueil pour aller se conecter dans la page login */
+
+.btn {
+    background-color: #2A73CC; 
+    color: white; 
+    padding: 15px 30px; 
+    font-size: 1.2em; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s; 
+    text-decoration: none; 
+    display: inline-block; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+}
+
+.btn:hover {
+    background-color: #1c5aa3; 
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
+}
+
+
+
+
