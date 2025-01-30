@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, redirect, flash
+from flask import Flask, render_template, request, url_for, redirect, flash, session
 import pymysql
 import csv
 import io
@@ -59,8 +59,12 @@ def login():
     return render_template("login.html")
 
 
-
-
+@app.route('/logout')
+def logout():
+    # Supprime les données de session de l'utilisateur
+    session.clear()
+    # Redirige vers la page de connexion ou d'accueil
+    return redirect(url_for('login'))
 
 
 
@@ -82,6 +86,10 @@ def chargement():
             table_data = list(reader)
 
     return render_template("chargement.html", table_data=table_data)
+
+
+
+
 
 
 

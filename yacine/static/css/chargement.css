@@ -1,9 +1,11 @@
 body {
-    background-color: #3498db; /* Fond bleu */
+    background-color: #2A73CC; /* Fond bleu */
     font-family: Arial, sans-serif;
     text-align: center;
     color: white;
 }
+
+
 .container {
     margin: 50px auto;
     width: 80%;
@@ -26,4 +28,23 @@ th, td {
 th {
     background-color: #2980b9;
     color: white;
+}
+
+
+
+
+.logout-button {
+    display: inline-block;
+    margin-top: 50px; /* Ajustez la valeur pour descendre */
+    padding: 10px 20px;
+    background-color: #e53935; /* Rouge */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+    background-color: #c62828; /* Rouge foncé */
 }

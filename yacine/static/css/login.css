@@ -70,6 +70,36 @@ h2 {
 
 
 
+
+.logo-section {
+    margin-bottom: 15px;
+}
+
+.logo {
+    max-width: 150px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.bank-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #000000;
+    margin: 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* les texte  */
 
 h1 {

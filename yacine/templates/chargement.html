@@ -13,7 +13,7 @@
             <input type="file" name="csvFile" accept=".csv" required>
             <button type="submit">Importer</button>
         </form>
-
+        <a href="{{ url_for('logout') }}" class="logout-button">Déconnexion</a>
         {% if table_data %}
         <table border="1">
             <thead>
