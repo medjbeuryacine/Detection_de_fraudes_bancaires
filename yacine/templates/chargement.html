@@ -18,17 +18,25 @@
         <table border="1">
             <thead>
                 <tr>
-                    {% for header in table_data[0] %}
-                    <th>{{ header }}</th>
-                    {% endfor %}
+                    <th>Transaction ID</th>
+                    <th>Step</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Name Orig</th>
+                    <th>Name Dest</th>
+                    <th>Prediction Fraude</th>
                 </tr>
             </thead>
             <tbody>
-                {% for row in table_data[1:] %}
+                {% for row in table_data %}
                 <tr>
-                    {% for cell in row %}
-                    <td>{{ cell }}</td>
-                    {% endfor %}
+                    <td>{{ row[0] }}</td>  {# transactionId #}
+                    <td>{{ row[1] }}</td>  {# step #}
+                    <td>{{ row[2] }}</td>  {# type #}
+                    <td>{{ row[3] }}</td>  {# amount #}
+                    <td>{{ row[4] }}</td>  {# nameOrig #}
+                    <td>{{ row[5] }}</td>  {# nameDest #}
+                    <td>{{ row[6] }}</td>  {# isFraud (prédiction) #}
                 </tr>
                 {% endfor %}
             </tbody>
