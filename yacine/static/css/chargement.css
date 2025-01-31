@@ -48,3 +48,28 @@ th {
 .logout-button:hover {
     background-color: #c62828; /* Rouge foncé */
 }
+
+
+
+
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.filters input, .filters select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.filters input {
+    width: 200px;
+}
+
+.filters select {
+    width: 150px;
+}

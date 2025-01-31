@@ -123,8 +123,6 @@ def chargement():
                 true_fraud_value = true_fraud[index] if true_fraud is not None else None
 
 
-
-
                 if true_fraud_value is not None:
                     prediction_correct = True if true_fraud is not None and is_fraud_pred == true_fraud else False
                 else:

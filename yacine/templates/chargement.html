@@ -15,6 +15,30 @@
         </form>
         <a href="{{ url_for('logout') }}" class="logout-button">Déconnexion</a>
         {% if table_data %}
+
+        <!-- un bouton pour afficher le type de paiment  -->
+        <h2>Filtrer les transactions</h2>
+        <input type="text" id="searchTransaction" placeholder="Rechercher un Transaction ID...">
+        
+        <label for="typeFilter">Type :</label>
+        <select id="typeFilter">
+            <option value="">Tous</option>
+            <option value="CASH_OUT">CASH_OUT</option>
+            <option value="CASH_IN">CASH_IN</option>
+            <option value="TRANSFER">TRANSFER</option>
+            <option value="PAYMENT">PAYMENT</option>
+            <option value="DEBIT">DEBIT</option>
+        </select>
+
+        <!-- un bouton pour chercher les fraude ou pas ou afficher les deux -->
+        <label for="fraudFilter">Fraude :</label>
+        <select id="fraudFilter">
+            <option value="">Tous</option>
+            <option value="1">Fraude</option>
+            <option value="0">Non Fraude</option>
+        </select>
+
+
         <table border="1">
             <thead>
                 <tr>
@@ -43,5 +67,38 @@
         </table>
         {% endif %}
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("searchTransaction");
+            const typeFilter = document.getElementById("typeFilter");
+            const fraudFilter = document.getElementById("fraudFilter");
+            const table = document.getElementById("transactionsTable");
+            const rows = table.getElementsByTagName("tr");
+
+            function filterTable() {
+                const searchValue = searchInput.value.toLowerCase();
+                const typeValue = typeFilter.value;
+                const fraudValue = fraudFilter.value;
+
+                for (let i = 1; i < rows.length; i++) {
+                    let row = rows[i];
+                    let transactionId = row.cells[0].innerText.toLowerCase();
+                    let type = row.cells[2].innerText;
+                    let isFraud = row.cells[6].innerText;
+
+                    let matchesSearch = searchValue === "" || transactionId.includes(searchValue);
+                    let matchesType = typeValue === "" || type === typeValue;
+                    let matchesFraud = fraudValue === "" || isFraud === fraudValue;
+
+                    row.style.display = (matchesSearch && matchesType && matchesFraud) ? "" : "none";
+                }
+            }
+
+            searchInput.addEventListener("keyup", filterTable);
+            typeFilter.addEventListener("change", filterTable);
+            fraudFilter.addEventListener("change", filterTable);
+        });
+    </script>
 </body>
 </html>
