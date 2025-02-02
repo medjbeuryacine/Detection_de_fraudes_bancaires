@@ -112,7 +112,7 @@ def chargement():
             data = data.drop(columns=["isFraud"])
             
             # prediction par ia et les colonne change apartir que les colonnes que le model fait pour predir la fraud ou pas
-            data["isFraud"] = model_ia.predict(data[["amount","oldbalanceOrg","newbalanceDest","type_CASH_IN","type_CASH_OUT","type_DEBIT", "type_PAYMENT","type_TRANSFER"]])
+            data["isFraud"] = model_ia.predict(data[["amount","oldbalanceOrg","newbalanceDest","type"]])
 
             # Convertir les données en liste pour affichage Jinja
             table_data = data[["transactionId", "step","type","amount","nameOrig","nameDest","isFraud"]].values.tolist()
