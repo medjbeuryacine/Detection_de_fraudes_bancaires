@@ -189,3 +189,35 @@ th {
     color: #fff;
     border-color: #333;
 }
+
+
+
+
+
+
+
+
+
+
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination button {
+    margin: 5px;
+    padding: 8px 12px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.pagination button:hover {
+    background-color: #0056b3;
+}
+
+.pagination .active {
+    background-color: #0056b3;
+    font-weight: bold;
+}

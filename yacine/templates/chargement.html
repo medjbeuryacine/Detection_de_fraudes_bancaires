@@ -69,7 +69,7 @@
             <option value="25">25</option>
             <option value="50">50</option>
             <option value="100">100</option>
-            <option value="all">TOUS</option>
+            <option value="all">Tous</option>
         </select>
 
         <!-- un bouton pour afficher le type de paiment  -->
@@ -123,20 +123,7 @@
                 {% endfor %}
             </tbody>
         </table>
-
-        <!-- pour diviser le tableau en pages -->
-        {% if total_pages > 1 %}
-        <div class="pagination">
-            {% for p in range(1, total_pages + 1) %}
-                {% if p == current_page %}
-                    <span class="active">{{ p }}</span>
-                {% else %}
-                <a href="{{ url_for('chargement', page=p, limit=limit) }}?page={{ p }}">{{ p }}</a>
-                {% endif %}
-            {% endfor %}
-        </div>
-        {% endif %}
-
+        <div id="pagination" class="pagination"></div>
 
         <!-- Section graphique -->
         <canvas id="fraudDetectionChart" width="400" height="200"></canvas>
@@ -218,12 +205,61 @@
 
 
 
-        //  pour diviser le tableau en pages 
-        document.getElementById("limit").addEventListener("change", function() {
-        const limit = this.value;
-        // Redirige vers la route en passant le paramètre limit
-        window.location.href = "{{ url_for('chargement') }}" + "?limit=" + limit;
+        ////  pour diviser le tableau en pages 
+        document.addEventListener("DOMContentLoaded", function () {
+    let rows = Array.from(document.querySelectorAll("#transactionsTable tbody tr"));
+    let limitSelect = document.getElementById("limit");
+    let paginationDiv = document.getElementById("pagination");
+
+    function showPage(page, rowsPerPage) {
+        let start = (page - 1) * rowsPerPage;
+        let end = start + rowsPerPage;
+
+        rows.forEach((row, index) => {
+            row.style.display = index >= start && index < end ? "" : "none";
         });
+    }
+
+    function createPagination(totalRows, rowsPerPage) {
+        paginationDiv.innerHTML = "";  // Vider la pagination précédente
+        let totalPages = Math.ceil(totalRows / rowsPerPage);
+
+        if (totalPages <= 1) return; // Pas de pagination si une seule page
+
+        for (let i = 1; i <= totalPages; i++) {
+            let btn = document.createElement("button");
+            btn.textContent = i;
+            btn.addEventListener("click", function () {
+                showPage(i, rowsPerPage);
+                document.querySelectorAll("#pagination button").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+            });
+
+            paginationDiv.appendChild(btn);
+        }
+
+        // Activer la première page par défaut
+        paginationDiv.querySelector("button").classList.add("active");
+        showPage(1, rowsPerPage);
+    }
+
+    function updateTable() {
+        let limit = limitSelect.value;
+
+        if (limit.toLowerCase() === "all" && rows.length > 500) {
+            createPagination(rows.length, 500);
+        } else {
+            paginationDiv.innerHTML = "";  // Supprimer la pagination
+            let maxRows = limit.toLowerCase() === "all" ? rows.length : parseInt(limit);
+            rows.forEach((row, index) => {
+                row.style.display = index < maxRows ? "" : "none";
+            });
+        }
+    }
+
+    limitSelect.addEventListener("change", updateTable);
+    updateTable(); // Exécuter au chargement de la page
+});
     </script>
 </body>
 </html>

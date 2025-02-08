@@ -128,18 +128,28 @@ def chargement():
 
 
                 # ouvrir le model ia
-                with open("modele_finale.dill", "rb") as file:
+                with open("modele_finale_2.dill", "rb") as file:
                     model = dill.load(file)
 
                 try:
                 # prediction par ia et les colonne change apartir que les colonnes que le model fait pour predir la fraud ou pas
                     print("Avant transformation, shape =", data.shape)
-                    data_transformer = model.named_steps["drop_colonnes"].transform(data)
+                    data_transformer = model.named_steps["drop_colonnes"].transform(data) # supprimer les colonnes
                     print("Après drop_colonnes, shape =", data_transformer.shape)
+
+                    data_transformer = model.named_steps["covertir_transfomer"].transform(data_transformer) 
+                    print("Après covertir, shape =", data_transformer.shape)
+                    # print("info", data_transformer.info())
+
+                    # print("les valeur manquantes avant:", data_transformer.isna().sum())
+                    data_transformer = model.named_steps["nan_transformer"].transform(data_transformer)
+                    print("Après transformation, shape =", data_transformer.shape)
+                    # print("les valeur manquantes après:", data_transformer.isna().sum())
 
 
                     data_transformer = model.named_steps["transformers"].transform(data_transformer)
-                    # print("Après transformation, shape =", data_transformer.shape)
+                    print("Après transformation, shape =", data_transformer.shape)
+
 
                     prediction = model.named_steps["model"].predict(data_transformer)
                     print("Format prédictions :", type(prediction), "Shape :", prediction.shape)
@@ -216,32 +226,6 @@ def chargement():
                 db.commit()
             except Exception as e:
                 return f"Le problème est : {e}"
-    # Si table_data contient des données, appliquer la pagination
-    if table_data:
-        # Récupérer le numéro de page depuis l'URL (par défaut 1)
-        page = request.args.get('page', 1, type=int)
-        limit_param = request.args.get('limit', '500') 
-
-        if limit_param.lower() == "tous":
-            if len(table_data) > 500:
-                rows_per_page = 500
-            else:
-                rows_per_page = len(table_data)
-        else:
-            rows_per_page = int(limit_param)
-
-        total_rows = len(table_data)
-        total_pages = math.ceil(total_rows / rows_per_page)
-
-        start = (page - 1) * rows_per_page
-        end = start + rows_per_page
-        paginated_data = table_data[start:end]
-    else:
-        paginated_data = table_data
-        page = 1
-        total_pages = 0
-        limit_param = '500'
-
 
 
 
@@ -249,9 +233,12 @@ def chargement():
                            table_data=table_data,
                            pourcentage_detection_fraud=pourcentage_detection_fraud,
                            pourcentage_detection_non_fraud=pourcentage_detection_non_fraud,
-                           total_pages=total_pages,
-                           current_page=page,
-                           limit=limit_param)
+                        #    table_data=paginated_data,
+                        #    total_pages=total_pages,
+                        #    current_page=current_page,
+                        #    limit=limit_param,
+                        #    total_rows=total_rows
+                        )
 
 
 
