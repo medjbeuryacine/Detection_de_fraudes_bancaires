@@ -4,24 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} Import CSV et affichage en tableau {% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/montre.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chargement.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo de la banque">
+            <h1>MYF BANQUE</h1>
+        </div>
+        
+        <div class="user-info">
+            <div class="connection-status">
+                <span class="status-indicator"></span>
+                <span class="status-text">Connecté</span>
+            </div>    
+            <a href="{{ url_for('logout') }}" class="logout-button">Déconnexion</a>
+            
+        </div>
+    </div>
+
+
     <div class="container">
         <h1>Importer un fichier CSV</h1>
+        {% if table_data %}
+        <div class="performance-container">
+            <h2 class="performance-title">Performance de l'IA</h2>
+            <p class="performance-text">
+                🔍 Détection des fraudes :  
+                <strong class="performance-percentage {% if pourcentage_detection_fraud < 50 %}performance-low{% endif %}">
+                    {{ pourcentage_detection_fraud|round(2) }}%
+                </strong>
+            </p>
+            <p class="performance-text">
+                ✅ Détection des non-fraudes :  
+                <strong class="performance-percentage {% if pourcentage_detection_non_fraud < 50 %}performance-low{% endif %}">
+                    {{ pourcentage_detection_non_fraud|round(2) }}%
+                </strong>
+            </p>
+
+            <!-- Lien vers la page de graphique -->
+        <a href="{{ url_for('afficher_graphique') }}?pourcentage_detection_fraud={{ pourcentage_detection_fraud }}&pourcentage_detection_non_fraud={{ pourcentage_detection_non_fraud }}" target="_blank">
+            <button>Afficher le Graphique</button>
+        </a>
+        </div>
+        {% endif %}
+
 
         <!-- Formulaire pour télécharger le fichier -->
         <form method="POST" enctype="multipart/form-data" id="uploadForm" onsubmit="showLoadingAnimation()">
             <input type="file" name="csvFile" accept=".csv" required>
             <button type="submit" id="importButton">
                 <span class="button-text">Importer</span>
-                <span class="loading-icon"></span>
+                <img src="{{ url_for('static', filename='images/montre.png') }}" alt="Chargement" class="loading-icon">
             </button>
         </form>
-
-        <a href="{{ url_for('logout') }}" class="logout-button">Déconnexion</a>
-
 
         {% if table_data %}
 
@@ -32,7 +69,7 @@
             <option value="25">25</option>
             <option value="50">50</option>
             <option value="100">100</option>
-            <option value="all">Tous</option>
+            <option value="all">TOUS</option>
         </select>
 
         <!-- un bouton pour afficher le type de paiment  -->
@@ -68,6 +105,7 @@
                     <th>Name Orig</th>
                     <th>Name Dest</th>
                     <th>Prediction Fraude</th>
+                    <th>Vraie Fraude</th>
                 </tr>
             </thead>
             <tbody>
@@ -80,10 +118,28 @@
                     <td>{{ row[4] }}</td>  {# nameOrig #}
                     <td>{{ row[5] }}</td>  {# nameDest #}
                     <td>{{ row[6] }}</td>  {# isFraud (prédiction) #}
+                    <td>{{ row[7] }}</td>  {# Vraie Fraude #}
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- pour diviser le tableau en pages -->
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% for p in range(1, total_pages + 1) %}
+                {% if p == current_page %}
+                    <span class="active">{{ p }}</span>
+                {% else %}
+                <a href="{{ url_for('chargement', page=p, limit=limit) }}?page={{ p }}">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+
+        <!-- Section graphique -->
+        <canvas id="fraudDetectionChart" width="400" height="200"></canvas>
         {% endif %}
     </div>
 
@@ -159,6 +215,15 @@
             updateTable();  // Appeler updateTable pour gérer l'affichage initial
         });
 
+
+
+
+        //  pour diviser le tableau en pages 
+        document.getElementById("limit").addEventListener("change", function() {
+        const limit = this.value;
+        // Redirige vers la route en passant le paramètre limit
+        window.location.href = "{{ url_for('chargement') }}" + "?limit=" + limit;
+        });
     </script>
 </body>
 </html>

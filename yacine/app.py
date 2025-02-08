@@ -1,15 +1,19 @@
-from flask import Flask, render_template, request, url_for, redirect, flash, session
+from flask import Flask, render_template, request, url_for, redirect, flash, session, send_file
 import pymysql
 import csv
 import io
 import pandas as pd
 import pickle
 import dill
+import matplotlib.pyplot as plt
+import base64
+import math
 
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.preprocessing import FunctionTransformer
 import numpy as np
+
 
 
 app = Flask(__name__)
@@ -92,6 +96,8 @@ cursor = db.cursor()
 @app.route("/chargement", methods=["GET","POST"], endpoint="chargement")
 def chargement():
     table_data = None
+    pourcentage_detection_fraud = 0
+    pourcentage_detection_non_fraud = 0
 
     if request.method == "POST":
         file = request.files["csvFile"]
@@ -151,7 +157,37 @@ def chargement():
 
                 # Convertir les données en liste pour affichage dans Jinja
                 table_data = data[["transactionId", "step","type","amount","nameOrig","nameDest","isFraud"]].values.tolist()
+                # ajouter la colonne de vrai prediction
+                if true_fraud is not None:
+                    for index, row in enumerate(table_data):
+                        row.append(true_fraud[index])
 
+                # afficher le pourcentage de fraude que l'ia à detecter
+                if true_fraud is not None:
+                    total_fraudes = sum(true_fraud)  # Nombre total de fraudes réelles
+                    total_non_fraudes = len(true_fraud) - total_fraudes
+                    if total_fraudes > 0:
+                        ia_detected_fraudes = sum(1 for i in range(len(true_fraud)) if true_fraud[i] == 1 and data["isFraud"].iloc[i] == "1") # calculer combien de fraude
+                        pourcentage_detection_fraud = (ia_detected_fraudes / total_fraudes) * 100
+                    else:
+                        pourcentage_detection_fraud = 0  # Pour éviter une division par zéro
+
+                    # afficher le pourcentage de non fraude que l'ia à detecter
+                    if total_non_fraudes > 0:
+                        ia_detected_non_fraudes = sum(1 for i in range(len(true_fraud)) if true_fraud[i] == 0 and data["isFraud"].iloc[i] == "0") # calculer combien de fraude
+                        pourcentage_detection_non_fraud = (ia_detected_non_fraudes / total_non_fraudes) * 100
+                    else:
+                        pourcentage_detection_non_fraud  = 0  # Pour éviter une division par zéro
+                else:
+                    pourcentage_detection_fraud = 0
+                    pourcentage_detection_non_fraud  = 0
+
+
+
+
+
+
+                # la base de données
                 for index, row in data.iterrows():
                     transaction_Id = row["transactionId"]
                     is_fraud_pred = row["isFraud"]
@@ -180,10 +216,73 @@ def chargement():
                 db.commit()
             except Exception as e:
                 return f"Le problème est : {e}"
+    # Si table_data contient des données, appliquer la pagination
+    if table_data:
+        # Récupérer le numéro de page depuis l'URL (par défaut 1)
+        page = request.args.get('page', 1, type=int)
+        limit_param = request.args.get('limit', '500') 
+
+        if limit_param.lower() == "tous":
+            if len(table_data) > 500:
+                rows_per_page = 500
+            else:
+                rows_per_page = len(table_data)
+        else:
+            rows_per_page = int(limit_param)
+
+        total_rows = len(table_data)
+        total_pages = math.ceil(total_rows / rows_per_page)
+
+        start = (page - 1) * rows_per_page
+        end = start + rows_per_page
+        paginated_data = table_data[start:end]
+    else:
+        paginated_data = table_data
+        page = 1
+        total_pages = 0
+        limit_param = '500'
 
 
-    return render_template("chargement.html", table_data=table_data)
 
+
+    return render_template("chargement.html", 
+                           table_data=table_data,
+                           pourcentage_detection_fraud=pourcentage_detection_fraud,
+                           pourcentage_detection_non_fraud=pourcentage_detection_non_fraud,
+                           total_pages=total_pages,
+                           current_page=page,
+                           limit=limit_param)
+
+
+
+
+@app.route("/affiche-graphique")
+def afficher_graphique():
+    # Pourcentages calculés dans la fonction chargement
+    pourcentage_detection_fraud = request.args.get("pourcentage_detection_fraud", type=float)
+    pourcentage_detection_non_fraud = request.args.get("pourcentage_detection_non_fraud", type=float)
+
+    # Génération du graphique
+    labels = ['Fraude', 'Non Fraude']
+    values = [pourcentage_detection_fraud, pourcentage_detection_non_fraud]
+
+    # Créer un graphique simple (barres)
+    fig, ax = plt.subplots()
+    ax.bar(labels, values, color=['red', 'green'])
+
+    # Ajouter un titre et des labels
+    ax.set_title("Pourcentage de Fraude et Non-Fraude détecté par l'IA")
+    ax.set_ylabel("Pourcentage (%)")
+
+    # Sauvegarder l'image dans un buffer en mémoire
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+
+    # Convertir l'image en base64 pour l'afficher dans la page HTML
+    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+
+    return render_template("graphique.html", img_base64=img_base64)
 
 
 
