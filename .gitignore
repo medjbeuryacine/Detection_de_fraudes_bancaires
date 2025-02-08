@@ -1,0 +1,7 @@
+*.csv
+*.dill
+*.pickle
+.venv
+yacine/IA/test.csv
+/yacine/IA
+*.csv

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphique de Détection de Fraude</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/graphique.css') }}">
+</head>
+<body>
+    <h1>Graphique de Détection de Fraude</h1>
+    <img src="data:image/png;base64,{{ img_base64 }}" alt="Graphique de Fraude">
+</body>
+</html>

@@ -4,21 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} Import CSV et affichage en tableau {% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/montre.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chargement.css') }}">
 </head>
 <body>
     <div class="container">
         <h1>Importer un fichier CSV</h1>
-        <form method="POST" enctype="multipart/form-data">
+
+        <!-- Formulaire pour télécharger le fichier -->
+        <form method="POST" enctype="multipart/form-data" id="uploadForm" onsubmit="showLoadingAnimation()">
             <input type="file" name="csvFile" accept=".csv" required>
-            <button type="submit">Importer</button>
+            <button type="submit" id="importButton">
+                <span class="button-text">Importer</span>
+                <span class="loading-icon"></span>
+            </button>
         </form>
+
         <a href="{{ url_for('logout') }}" class="logout-button">Déconnexion</a>
+
+
         {% if table_data %}
+
+        <!-- Sélection du nombre de lignes à afficher -->
+        <h2>Choisissez le nombre de lignes à afficher</h2>
+        <label for="limit">Nombre de lignes :</label>
+        <select id="limit" onchange="updateTable()">
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="all">Tous</option>
+        </select>
 
         <!-- un bouton pour afficher le type de paiment  -->
         <h2>Filtrer les transactions</h2>
-        <input type="text" id="searchTransaction" placeholder="Rechercher un Transaction ID...">
+        <input type="text" id="searchTransaction" placeholder="Transaction ID...">
         
         <label for="typeFilter">Type :</label>
         <select id="typeFilter">
@@ -39,7 +58,7 @@
         </select>
 
 
-        <table border="1">
+        <table id="transactionsTable" border="1">
             <thead>
                 <tr>
                     <th>Transaction ID</th>
@@ -69,36 +88,77 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const searchInput = document.getElementById("searchTransaction");
-            const typeFilter = document.getElementById("typeFilter");
-            const fraudFilter = document.getElementById("fraudFilter");
-            const table = document.getElementById("transactionsTable");
-            const rows = table.getElementsByTagName("tr");
 
-            function filterTable() {
-                const searchValue = searchInput.value.toLowerCase();
-                const typeValue = typeFilter.value;
-                const fraudValue = fraudFilter.value;
+        // Fonction pour afficher l'animation de chargement
+        function showLoadingAnimation() {
+            const button = document.getElementById("importButton");
+            const buttonText = button.querySelector(".button-text");
+            const loadingIcon = button.querySelector(".loading-icon");
 
-                for (let i = 1; i < rows.length; i++) {
-                    let row = rows[i];
-                    let transactionId = row.cells[0].innerText.toLowerCase();
-                    let type = row.cells[2].innerText;
-                    let isFraud = row.cells[6].innerText;
+            // Masquer le texte et afficher l'icône de chargement
+            buttonText.style.display = "none";
+            loadingIcon.style.display = "inline-block";
 
-                    let matchesSearch = searchValue === "" || transactionId.includes(searchValue);
-                    let matchesType = typeValue === "" || type === typeValue;
-                    let matchesFraud = fraudValue === "" || isFraud === fraudValue;
+            // Désactiver le bouton pour empêcher plusieurs soumissions
+            button.disabled = true;
+        }
 
-                    row.style.display = (matchesSearch && matchesType && matchesFraud) ? "" : "none";
-                }
+
+        // pour les filtres 
+        document.addEventListener("DOMContentLoaded", function() {
+    const searchTransaction = document.getElementById("searchTransaction");
+    const typeFilter = document.getElementById("typeFilter");
+    const fraudFilter = document.getElementById("fraudFilter");
+    const tableRows = document.querySelectorAll("tbody tr");
+
+    function filterTable() {
+        const searchValue = searchTransaction.value.toLowerCase();
+        const typeValue = typeFilter.value;
+        const fraudValue = fraudFilter.value;
+
+        tableRows.forEach(row => {
+            const transactionId = row.cells[0].textContent.toLowerCase();
+            const type = row.cells[2].textContent;
+            const fraud = row.cells[6].textContent;
+
+            const matchesSearch = transactionId.includes(searchValue);
+            const matchesType = typeValue === "" || type === typeValue;
+            const matchesFraud = fraudValue === "" || fraud === fraudValue;
+
+            if (matchesSearch && matchesType && matchesFraud) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
             }
-
-            searchInput.addEventListener("keyup", filterTable);
-            typeFilter.addEventListener("change", filterTable);
-            fraudFilter.addEventListener("change", filterTable);
         });
+    }
+
+    searchTransaction.addEventListener("input", filterTable);
+    typeFilter.addEventListener("change", filterTable);
+    fraudFilter.addEventListener("change", filterTable);
+    });
+
+    // pour selectioner les lignes
+    function updateTable() {
+            var limit = document.getElementById("limit").value;  // Récupérer la valeur choisie dans le sélecteur
+            var tableRows = document.querySelectorAll("#transactionsTable tbody tr");
+            var maxRows = (limit === "all") ? tableRows.length : parseInt(limit);  // Nombre max de lignes à afficher
+
+            // Afficher ou masquer les lignes en fonction du choix
+            tableRows.forEach((row, index) => {
+                if (index < maxRows) {
+                    row.style.display = "";  // Afficher la ligne
+                } else {
+                    row.style.display = "none";  // Masquer la ligne
+                }
+            });
+        }
+
+        // Fonction qui s'exécute au chargement de la page pour afficher les 25 premières lignes
+        document.addEventListener("DOMContentLoaded", function() {
+            updateTable();  // Appeler updateTable pour gérer l'affichage initial
+        });
+
     </script>
 </body>
 </html>

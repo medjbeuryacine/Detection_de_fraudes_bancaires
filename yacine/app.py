@@ -4,7 +4,12 @@ import csv
 import io
 import pandas as pd
 import pickle
+import dill
 
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
+from sklearn.preprocessing import FunctionTransformer
+import numpy as np
 
 
 app = Flask(__name__)
@@ -26,7 +31,7 @@ try:
     init_db()
     print("connecte")
 except Exception as e:
-    print(e)
+    print(f"vous avez le problem: {e}")
 
 
 
@@ -42,9 +47,7 @@ def accueil():
 def login():
     if request.method == "POST":
         login = request.form["username"]
-        #.get("username")
         mdb = request.form["password"]
-        #.get("mdb")
 
         connexion = init_db()
         with connexion.cursor() as cursor:
@@ -81,9 +84,6 @@ def logout():
 db = init_db()
 cursor = db.cursor()
 
-# ouvrir le model ia
-with open("", "rb") as file: #il manque le model ia
-    model_ia = pickle.load(file)
 
 
 
@@ -96,48 +96,91 @@ def chargement():
     if request.method == "POST":
         file = request.files["csvFile"]
         if file:
-            stream = io.StringIO(file.stream.read().decode("utf-8"))
-            data = pd.read_csv(stream, sep=";")
 
-            # selectioner les colonnes
-            colonne = ['transactionId', 'step', 'type', 'amount', 'nameOrig', 'oldbalanceOrg','newbalanceOrig', 'nameDest', 'oldbalanceDest', 'newbalanceDest','isFraud']
-            if not all(col in data.columns for col in colonne):
-                return "Erreur : colonne manquantes dans le fichier csv", 400
-            
+            try:
+                stream = io.StringIO(file.stream.read().decode("utf-8"))
+                data = pd.read_csv(stream, sep=";")
 
-            # Sauvegarder la vraie valeur de `isFraud` avant de la supprimer
-            true_fraud = data["isFraud"] if "isFraud" in data.columns else None
+                # selectioner les colonnes
+                colonne = ['transactionId', 'step', 'type', 'amount', 'nameOrig', 'oldbalanceOrg','newbalanceOrig', 'nameDest', 'oldbalanceDest', 'newbalanceDest','isFraud']
+                if not all(col in data.columns for col in colonne):
+                    return "Erreur : colonne manquantes dans le fichier csv", 400
+                
+                data = data.fillna(0)
 
-            # supprimer la colonne isFraud
-            data = data.drop(columns=["isFraud"])
-            
-            # prediction par ia et les colonne change apartir que les colonnes que le model fait pour predir la fraud ou pas
-            data["isFraud"] = model_ia.predict(data[["amount","oldbalanceOrg","newbalanceDest","type"]])
+                # Sauvegarder la vraie valeur de `isFraud` avant de la supprimer
+                true_fraud = data["isFraud"] if "isFraud" in data.columns else None
 
-            # Convertir les données en liste pour affichage Jinja
-            table_data = data[["transactionId", "step","type","amount","nameOrig","nameDest","isFraud"]].values.tolist()
-
-            for index, row in data.iterrows():
-                transaction_Id = row["transactionId"]
-                is_fraud_pred = row["isFraud"]
-                true_fraud_value = true_fraud[index] if true_fraud is not None else None
-
-
-                if true_fraud_value is not None:
-                    prediction_correct = True if true_fraud is not None and is_fraud_pred == true_fraud else False
+                # supprimer la colonne isFraud
+                if "isFraud" in data.columns:
+                    true_fraud = data["isFraud"].fillna(0)
+                    true_fraud = data["isFraud"].astype(int)
+                    true_fraud = true_fraud.tolist()
+                    data = data.drop(columns=["isFraud"])
                 else:
-                    prediction_correct = None
+                    true_fraud = None
+
+
+                # ouvrir le model ia
+                with open("modele_finale.dill", "rb") as file:
+                    model = dill.load(file)
+
+                try:
+                # prediction par ia et les colonne change apartir que les colonnes que le model fait pour predir la fraud ou pas
+                    print("Avant transformation, shape =", data.shape)
+                    data_transformer = model.named_steps["drop_colonnes"].transform(data)
+                    print("Après drop_colonnes, shape =", data_transformer.shape)
+
+
+                    data_transformer = model.named_steps["transformers"].transform(data_transformer)
+                    # print("Après transformation, shape =", data_transformer.shape)
+
+                    prediction = model.named_steps["model"].predict(data_transformer)
+                    print("Format prédictions :", type(prediction), "Shape :", prediction.shape)
+
+                    
+                    if isinstance(prediction, list):
+                        prediction = np.array(prediction)
+                    if prediction.ndim > 1:
+                        prediction = prediction.flatten()
+
+                    data["isFraud"] = prediction.astype(str)
+
+                except Exception as e:
+                    return f"le problem {e}"
+
+                # Convertir les données en liste pour affichage dans Jinja
+                table_data = data[["transactionId", "step","type","amount","nameOrig","nameDest","isFraud"]].values.tolist()
+
+                for index, row in data.iterrows():
+                    transaction_Id = row["transactionId"]
+                    is_fraud_pred = row["isFraud"]
+                    true_fraud_value = true_fraud[index] if true_fraud is not None else None
+
+
+                    if true_fraud_value is not None:
+                        prediction_correct = True if true_fraud is not None and is_fraud_pred == true_fraud else False
+                    else:
+                        prediction_correct = None
 
 
 
 
-                sql = """
-                        INSERT INTO transactions (transactionId, isFraud, prediction_Correct_Ou_Non) VALUES (%s,%s,%s)
-                      """
-                cursor.execute(sql, (transaction_Id, is_fraud_pred, prediction_correct))
+                    sql = """
+                            INSERT INTO Prediction (transactionId, isFraude, prediction_Correct_Ou_Non) VALUES (%s,%s,%s) 
+                            ON DUPLICATE KEY UPDATE isFraude = IF(isFraude != VALUES(isFraude), VALUES(isFraude), isFraude)
+                        """
+                    try:
+                        cursor.execute(sql, (transaction_Id, is_fraud_pred, prediction_correct))
+                    except Exception as e:
+                        db.rollback()
+                        print("Erreur lors de l'insertion dans la base de données:", e)
 
 
-            db.commit()
+                db.commit()
+            except Exception as e:
+                return f"Le problème est : {e}"
+
 
     return render_template("chargement.html", table_data=table_data)
 
@@ -150,8 +193,3 @@ def chargement():
 if __name__ == "__main__":
     app.run(debug=True)
 
-
-
-
-# reader = csv.reader(stream, delimiter=",")
-# table_data = list(reader)
