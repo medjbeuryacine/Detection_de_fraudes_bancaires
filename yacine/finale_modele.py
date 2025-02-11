@@ -7,14 +7,25 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 
 
-with open("modele_new.dill", "rb") as f :
-    model = dill.load(f)
+with open("modele_NEW.pickle", "rb") as f :
+    model = pickle.load(f)
 
 
 
 # # _________________________________________________________________fonction drop colonne___________________________________________________
+# def drop_colonne(df):
+#     colonne_drop = ["transactionId","step",'nameOrig','nameDest','oldbalanceDest','newbalanceOrig']
+#     colonne_drop = [col for col in colonne_drop if col in df.columns]
+#     df =  df.drop(columns= colonne_drop, axis=1)
+#     return df
+
+# supprimer_colonne = FunctionTransformer(drop_colonne, validate=False)
+
+
+
+#____________________________________________________________________2 fonction drop colonne_______________________________________________________
 def drop_colonne(df):
-    colonne_drop = ["transactionId","step",'nameOrig','nameDest','oldbalanceDest','newbalanceOrig']
+    colonne_drop = ["transactionId","step",'nameOrig','nameDest','newbalanceDest','newbalanceOrig']
     colonne_drop = [col for col in colonne_drop if col in df.columns]
     df =  df.drop(columns= colonne_drop, axis=1)
     return df
@@ -22,11 +33,9 @@ def drop_colonne(df):
 supprimer_colonne = FunctionTransformer(drop_colonne, validate=False)
 
 
-
-
 # #__________________________________________________fonction covertir en nombre_________________________________________
 def convert_to_float(df):
-    colonnes = ['amount', 'oldbalanceOrg', 'newbalanceDest']
+    colonnes = ['amount', 'oldbalanceOrg', 'oldbalanceDest']
     df = df.copy()
     for col in colonnes:
         if col in df.columns:
@@ -148,6 +157,6 @@ model_final = Pipeline([
 
 
 # ___________________________________________________________________enregistrer le model_____________________________________________________
-with open("modele_finale_2_new.dill", "wb") as fichier:
+with open("modele_finale_3_new.dill", "wb") as fichier:
     dill.dump(model_final, fichier)
 

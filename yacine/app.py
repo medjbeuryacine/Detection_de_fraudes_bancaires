@@ -96,11 +96,16 @@ cursor = db.cursor()
 @app.route("/chargement", methods=["GET","POST"], endpoint="chargement")
 def chargement():
     table_data = None
-    # pourcentage_detection_fraud = 0
-    # pourcentage_detection_non_fraud = 0
+
     pourcentage_prediction_fraud = 0
     pourcentage_prediction_non_fraud = 0
 
+    total_fraudes_fichier = 0
+    total_non_fraudes_fichier = 0
+    total_predicted_fraudes_ia = 0
+    total_predicted_non_fraudes_ia = 0
+    total_vrai_fraudes_ia = 0
+    total_vrai_non_fraudes_ia = 0
 
     if request.method == "POST":
         file = request.files["csvFile"]
@@ -203,6 +208,26 @@ def chargement():
                     pourcentage_prediction_non_fraud = 0
 
 
+                # Calcul des valeurs
+                if true_fraud is not None:
+                    total_fraudes_fichier = sum(true_fraud)
+                    total_non_fraudes_fichier = len(true_fraud) - total_fraudes_fichier
+
+                    # Calcul des fraudes et non-fraudes de l'IA
+                    total_predicted_fraudes_ia = sum(1 for i in range(len(true_fraud)) if data["isFraud"].iloc[i] == "1")
+                    total_predicted_non_fraudes_ia = sum(1 for i in range(len(true_fraud)) if data["isFraud"].iloc[i] == "0")
+
+                    # Calcul des vraies fraudes et non-fraudes de l'IA
+                    total_vrai_fraudes_ia = sum(1 for i in range(len(true_fraud)) if data["isFraud"].iloc[i] == "1" and true_fraud[i] == 1)
+                    total_vrai_non_fraudes_ia = sum(1 for i in range(len(true_fraud)) if data["isFraud"].iloc[i] == "0" and true_fraud[i] == 0)
+                else:
+                    total_fraudes_fichier = 0
+                    total_non_fraudes_fichier = 0
+                    total_predicted_fraudes_ia = 0
+                    total_predicted_non_fraudes_ia = 0
+                    total_vrai_fraudes_ia = 0
+                    total_vrai_non_fraudes_ia = 0
+
 
 
 
@@ -241,8 +266,12 @@ def chargement():
     return render_template("chargement.html", 
                            table_data=table_data,
                            pourcentage_prediction_fraud=pourcentage_prediction_fraud,
-                           pourcentage_prediction_non_fraud=pourcentage_prediction_non_fraud
-
+                           pourcentage_prediction_non_fraud=pourcentage_prediction_non_fraud,
+                           total_non_fraudes_fichier=total_non_fraudes_fichier,
+                           total_predicted_fraudes_ia=total_predicted_fraudes_ia,
+                           total_predicted_non_fraudes_ia=total_predicted_non_fraudes_ia,
+                           total_vrai_fraudes_ia=total_vrai_fraudes_ia,
+                           total_vrai_non_fraudes_ia=total_vrai_non_fraudes_ia
                         )
 
 

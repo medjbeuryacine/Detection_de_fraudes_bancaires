@@ -26,22 +26,35 @@
 
 
     <div class="container">
-        <h1>Importer un fichier CSV</h1>
+        <h1>Importer les transactions à predire (sous la forme d'un fichier csv) </h1>
         {% if table_data %}
         <div class="performance-container">
             <h2 class="performance-title">Performance de l'IA</h2>
             <p class="performance-text">
-                🔍 Précision sur les fraudes  :  
+                🔍 Porcentage des fraude bien predit:  
                 <strong class="performance-percentage {% if pourcentage_prediction_fraud < 50 %}performance-low{% endif %}">
                     {{ pourcentage_prediction_fraud|round(2) }}%
                 </strong>
             </p>
             <p class="performance-text">
-                ✅ Précision sur les non-fraudes :  
+                ✅ Porcentage des non fraude bien predit:  
                 <strong class="performance-percentage {% if pourcentage_prediction_non_fraud < 50 %}performance-low{% endif %}">
                     {{ pourcentage_prediction_non_fraud|round(2) }}%
                 </strong>
             </p>
+
+            <div>
+                <h3>Résultats de la détection de fraude</h3>
+                <p><strong>Nombre de fraudes réelles dans le fichier : </strong>{{ total_fraudes_fichier }}</p>
+                <p><strong>Nombre de non-fraudes réelles dans le fichier : </strong>{{ total_non_fraudes_fichier }}</p>
+
+                <p><strong>Nombre de fraudes détectées par l'IA : </strong>{{ total_predicted_fraudes_ia }}</p>
+                <p><strong>Nombre de non-fraudes détectées par l'IA : </strong>{{ total_predicted_non_fraudes_ia }}</p>
+
+                <p><strong>Nombre de vraies fraudes détectées par l'IA : </strong>{{ total_vrai_fraudes_ia }}</p>
+                <p><strong>Nombre de vraies non-fraudes détectées par l'IA : </strong>{{ total_vrai_non_fraudes_ia }}</p>
+            </div>
+            
 
             <!-- Lien vers la page de graphique -->
         <a href="{{ url_for('afficher_graphique') }}?pourcentage_prediction_fraud={{ pourcentage_prediction_fraud }}&pourcentage_prediction_non_fraud={{ pourcentage_prediction_non_fraud }}" target="_blank">
@@ -55,7 +68,7 @@
         <form method="POST" enctype="multipart/form-data" id="uploadForm" onsubmit="showLoadingAnimation()">
             <input type="file" name="csvFile" accept=".csv" required>
             <button type="submit" id="importButton">
-                <span class="button-text">Importer</span>
+                <span class="button-text">predire</span>
                 <img src="{{ url_for('static', filename='images/montre.png') }}" alt="Chargement" class="loading-icon">
             </button>
         </form>
