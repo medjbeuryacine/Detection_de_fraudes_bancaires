@@ -7,8 +7,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 
 
-with open("modele_2.pickle", "rb") as f :
-    model = pickle.load(f)
+with open("modele_new.dill", "rb") as f :
+    model = dill.load(f)
 
 
 
@@ -148,6 +148,6 @@ model_final = Pipeline([
 
 
 # ___________________________________________________________________enregistrer le model_____________________________________________________
-with open("modele_finale_2.dill", "wb") as fichier:
+with open("modele_finale_2_new.dill", "wb") as fichier:
     dill.dump(model_final, fichier)
 

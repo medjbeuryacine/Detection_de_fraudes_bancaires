@@ -11,8 +11,8 @@ import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
 import dill
 
-x_train = pd.read_csv('C:\\Users\\yacine.medjbeur\\Documents\\GitHub\\Projet_fraude\\yacine\\entrainement_de_model\\x_smote_tomek_train.csv', sep=';')
-y_train = pd.read_csv('C:\\Users\\yacine.medjbeur\\Documents\\GitHub\\Projet_fraude\\yacine\\entrainement_de_model\\y_smote_tomek_train.csv', sep=';')
+x_train = pd.read_csv('C:\\Users\\yacine.medjbeur\\Downloads\\x_smote_tomek_train.csv', sep=';')
+y_train = pd.read_csv('C:\\Users\\yacine.medjbeur\\Downloads\\y_smote_tomek_train.csv', sep=';')
 
 y_train = y_train.values.ravel()
 
@@ -23,7 +23,7 @@ model = RandomForestClassifier(max_depth=30,
 
 model.fit(x_train, y_train)
 
-with open("model.dill", 'wb') as fichier:
+with open("modele_new.dill", 'wb') as fichier:
     dill.dump(model, fichier)
     print(model)
 

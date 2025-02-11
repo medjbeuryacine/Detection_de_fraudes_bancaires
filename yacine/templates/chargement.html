@@ -31,20 +31,20 @@
         <div class="performance-container">
             <h2 class="performance-title">Performance de l'IA</h2>
             <p class="performance-text">
-                🔍 Détection des fraudes :  
-                <strong class="performance-percentage {% if pourcentage_detection_fraud < 50 %}performance-low{% endif %}">
-                    {{ pourcentage_detection_fraud|round(2) }}%
+                🔍 Précision sur les fraudes  :  
+                <strong class="performance-percentage {% if pourcentage_prediction_fraud < 50 %}performance-low{% endif %}">
+                    {{ pourcentage_prediction_fraud|round(2) }}%
                 </strong>
             </p>
             <p class="performance-text">
-                ✅ Détection des non-fraudes :  
-                <strong class="performance-percentage {% if pourcentage_detection_non_fraud < 50 %}performance-low{% endif %}">
-                    {{ pourcentage_detection_non_fraud|round(2) }}%
+                ✅ Précision sur les non-fraudes :  
+                <strong class="performance-percentage {% if pourcentage_prediction_non_fraud < 50 %}performance-low{% endif %}">
+                    {{ pourcentage_prediction_non_fraud|round(2) }}%
                 </strong>
             </p>
 
             <!-- Lien vers la page de graphique -->
-        <a href="{{ url_for('afficher_graphique') }}?pourcentage_detection_fraud={{ pourcentage_detection_fraud }}&pourcentage_detection_non_fraud={{ pourcentage_detection_non_fraud }}" target="_blank">
+        <a href="{{ url_for('afficher_graphique') }}?pourcentage_prediction_fraud={{ pourcentage_prediction_fraud }}&pourcentage_prediction_non_fraud={{ pourcentage_prediction_non_fraud }}" target="_blank">
             <button>Afficher le Graphique</button>
         </a>
         </div>

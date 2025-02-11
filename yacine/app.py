@@ -96,8 +96,11 @@ cursor = db.cursor()
 @app.route("/chargement", methods=["GET","POST"], endpoint="chargement")
 def chargement():
     table_data = None
-    pourcentage_detection_fraud = 0
-    pourcentage_detection_non_fraud = 0
+    # pourcentage_detection_fraud = 0
+    # pourcentage_detection_non_fraud = 0
+    pourcentage_prediction_fraud = 0
+    pourcentage_prediction_non_fraud = 0
+
 
     if request.method == "POST":
         file = request.files["csvFile"]
@@ -128,7 +131,7 @@ def chargement():
 
 
                 # ouvrir le model ia
-                with open("modele_finale_2.dill", "rb") as file:
+                with open("modele_finale_2_new.dill", "rb") as file:
                     model = dill.load(file)
 
                 try:
@@ -172,26 +175,32 @@ def chargement():
                     for index, row in enumerate(table_data):
                         row.append(true_fraud[index])
 
-                # afficher le pourcentage de fraude que l'ia à detecter
+                
+
                 if true_fraud is not None:
-                    total_fraudes = sum(true_fraud)  # Nombre total de fraudes réelles
-                    total_non_fraudes = len(true_fraud) - total_fraudes
-                    if total_fraudes > 0:
-                        ia_detected_fraudes = sum(1 for i in range(len(true_fraud)) if true_fraud[i] == 1 and data["isFraud"].iloc[i] == "1") # calculer combien de fraude
-                        pourcentage_detection_fraud = (ia_detected_fraudes / total_fraudes) * 100
-                    else:
-                        pourcentage_detection_fraud = 0  # Pour éviter une division par zéro
+                    # Remplacer les None dans true_fraud par 0
+                    true_fraud = [int(value) if value is not None else 0 for value in true_fraud]
 
-                    # afficher le pourcentage de non fraude que l'ia à detecter
-                    if total_non_fraudes > 0:
-                        ia_detected_non_fraudes = sum(1 for i in range(len(true_fraud)) if true_fraud[i] == 0 and data["isFraud"].iloc[i] == "0") # calculer combien de fraude
-                        pourcentage_detection_non_fraud = (ia_detected_non_fraudes / total_non_fraudes) * 100
+                    # Calcul des fraudes et non fraudes
+                    total_predicted_fraudes = sum(1 for i in range(len(true_fraud)) if data["isFraud"].iloc[i] == "1")
+                    total_predicted_non_fraudes = sum(1 for i in range(len(true_fraud)) if data["isFraud"].iloc[i] == "0")
+
+                    # Calcul du pourcentage de fraude
+                    if total_predicted_fraudes > 0:
+                        correct_fraud_predictions = sum(1 for i in range(len(true_fraud)) if data["isFraud"].iloc[i] == "1" and true_fraud[i] == 1)
+                        pourcentage_prediction_fraud = (correct_fraud_predictions / total_predicted_fraudes) * 100
                     else:
-                        pourcentage_detection_non_fraud  = 0  # Pour éviter une division par zéro
+                        pourcentage_prediction_fraud = 0  # Si aucune fraude prédite, mettre à 0
+
+                    # Calcul du pourcentage de non-fraude
+                    if total_predicted_non_fraudes > 0:
+                        correct_non_fraud_predictions = sum(1 for i in range(len(true_fraud)) if data["isFraud"].iloc[i] == "0" and true_fraud[i] == 0)
+                        pourcentage_prediction_non_fraud = (correct_non_fraud_predictions / total_predicted_non_fraudes) * 100
+                    else:
+                        pourcentage_prediction_non_fraud = 0  # Si aucune non-fraude prédite, mettre à 0
                 else:
-                    pourcentage_detection_fraud = 0
-                    pourcentage_detection_non_fraud  = 0
-
+                    pourcentage_prediction_fraud = 0
+                    pourcentage_prediction_non_fraud = 0
 
 
 
@@ -231,13 +240,9 @@ def chargement():
 
     return render_template("chargement.html", 
                            table_data=table_data,
-                           pourcentage_detection_fraud=pourcentage_detection_fraud,
-                           pourcentage_detection_non_fraud=pourcentage_detection_non_fraud,
-                        #    table_data=paginated_data,
-                        #    total_pages=total_pages,
-                        #    current_page=current_page,
-                        #    limit=limit_param,
-                        #    total_rows=total_rows
+                           pourcentage_prediction_fraud=pourcentage_prediction_fraud,
+                           pourcentage_prediction_non_fraud=pourcentage_prediction_non_fraud
+
                         )
 
 
@@ -246,12 +251,16 @@ def chargement():
 @app.route("/affiche-graphique")
 def afficher_graphique():
     # Pourcentages calculés dans la fonction chargement
-    pourcentage_detection_fraud = request.args.get("pourcentage_detection_fraud", type=float)
-    pourcentage_detection_non_fraud = request.args.get("pourcentage_detection_non_fraud", type=float)
+    pourcentage_prediction_fraud = request.args.get("pourcentage_prediction_fraud", type=float, default=0)
+    pourcentage_prediction_non_fraud = request.args.get("pourcentage_prediction_non_fraud", type=float, default=0)
 
     # Génération du graphique
     labels = ['Fraude', 'Non Fraude']
-    values = [pourcentage_detection_fraud, pourcentage_detection_non_fraud]
+    values = [pourcentage_prediction_fraud, pourcentage_prediction_non_fraud]
+
+    # Si les pourcentages sont None, on les définit sur 0 pour éviter l'erreur
+    pourcentage_prediction_fraud = pourcentage_prediction_fraud if pourcentage_prediction_fraud is not None else 0
+    pourcentage_prediction_non_fraud = pourcentage_prediction_non_fraud if pourcentage_prediction_non_fraud is not None else 0
 
     # Créer un graphique simple (barres)
     fig, ax = plt.subplots()
