@@ -267,6 +267,7 @@ def chargement():
                            table_data=table_data,
                            pourcentage_prediction_fraud=pourcentage_prediction_fraud,
                            pourcentage_prediction_non_fraud=pourcentage_prediction_non_fraud,
+                           total_fraudes_fichier=total_fraudes_fichier,
                            total_non_fraudes_fichier=total_non_fraudes_fichier,
                            total_predicted_fraudes_ia=total_predicted_fraudes_ia,
                            total_predicted_non_fraudes_ia=total_predicted_non_fraudes_ia,

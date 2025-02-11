@@ -13,13 +13,13 @@ with open("modele_NEW.pickle", "rb") as f :
 
 
 # # _________________________________________________________________fonction drop colonne___________________________________________________
-# def drop_colonne(df):
-#     colonne_drop = ["transactionId","step",'nameOrig','nameDest','oldbalanceDest','newbalanceOrig']
-#     colonne_drop = [col for col in colonne_drop if col in df.columns]
-#     df =  df.drop(columns= colonne_drop, axis=1)
-#     return df
+def drop_colonne(df):
+    colonne_drop = ["transactionId","step",'nameOrig','nameDest','oldbalanceDest','newbalanceOrig']
+    colonne_drop = [col for col in colonne_drop if col in df.columns]
+    df =  df.drop(columns= colonne_drop, axis=1)
+    return df
 
-# supprimer_colonne = FunctionTransformer(drop_colonne, validate=False)
+supprimer_colonne = FunctionTransformer(drop_colonne, validate=False)
 
 
 
